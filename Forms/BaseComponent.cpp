@@ -95,20 +95,6 @@ void Forms::BaseComponent::Show()
 	InitComponentAndDoAction([this] { ShowWindow(GetHwnd(), SW_SHOWNORMAL); ShowChildComponents(); });
 }
 
-LRESULT Forms::BaseComponent::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-		case WM_DESTROY: 
-			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-
-	return 0;
-}
-
 void Forms::BaseComponent::AddChild(BaseComponent *child)
 {
 	_childComponents.insert(child);
@@ -158,11 +144,6 @@ void Forms::BaseComponent::InitComponent()
 	DestroyComponent();
 	_hwnd = CreateWindow(GetComponentClassName().c_str(), GetCaption().c_str(), _styles, GetX(), GetY(), GetWidth(), GetHeight(), GetParentComponent() != nullptr ? GetParentComponent()->GetHwnd() : HWND_DESKTOP, 
 		nullptr, _hInstance, nullptr);
-
-	if (_hwnd)
-	{
-		Application::AddComponent(this);
-	}
 }
 
 void Forms::BaseComponent::DestroyComponent()
@@ -170,7 +151,6 @@ void Forms::BaseComponent::DestroyComponent()
 	if (GetHwnd())
 	{
 		DestroyChildComponents();
-		Application::RemoveComponent(this);
 		DestroyWindow(GetHwnd());
 		_hwnd = nullptr;
 	}

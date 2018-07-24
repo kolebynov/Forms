@@ -13,15 +13,15 @@ namespace Forms
 		static WNDPROC GetWndProc();
 		static void Init(HINSTANCE hInstance);
 		static HINSTANCE GetHinstance();
-		static void AddComponent(BaseComponent *component);
-		static void RemoveComponent(BaseComponent *component);
+		static void AddForm(Form *form);
+		static void RemoveForm(Form *form);
 		static void EnableVisualStyles();
 
 	private:
 		Application();
 
 		static HINSTANCE _hInstance;
-		static std::unordered_map<HWND, BaseComponent*> _components;
+		static std::unordered_map<HWND, Form*> _forms;
 
 		static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};

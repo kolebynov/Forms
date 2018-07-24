@@ -30,7 +30,6 @@ namespace Forms
 		void SetParentComponent(BaseComponent *parent);
 
 		void Show();
-		virtual LRESULT HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 		void AddChild(BaseComponent *child);
 		void RemoveChild(BaseComponent *child);
@@ -40,8 +39,8 @@ namespace Forms
 		BaseComponent(const std::wstring &componentClassName);
 		~BaseComponent();
 
-		void InitComponent();
-		void DestroyComponent();
+		virtual void InitComponent();
+		virtual void DestroyComponent();
 		HINSTANCE GetHinstance();
 
 		const std::wstring& GetComponentClassName() const;

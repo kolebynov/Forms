@@ -5,7 +5,7 @@ using namespace Forms;
 using namespace std;
 
 HINSTANCE Application::_hInstance = nullptr;
-unordered_map<HWND, BaseComponent*> Application::_components = unordered_map<HWND, BaseComponent*>();
+unordered_map<HWND, Form*> Application::_forms = unordered_map<HWND, Form*>();
 
 void Application::Run(Form *mainForm)
 {
@@ -34,14 +34,14 @@ HINSTANCE Forms::Application::GetHinstance()
 	return Application::_hInstance;
 }
 
-void Forms::Application::AddComponent(BaseComponent *component)
+void Forms::Application::AddForm(Form *form)
 {
-	_components[component->GetHwnd()] = component;
+	_forms[form->GetHwnd()] = form;
 }
 
-void Forms::Application::RemoveComponent(BaseComponent *component)
+void Forms::Application::RemoveForm(Form *form)
 {
-	_components.erase(component->GetHwnd());
+	_forms.erase(form->GetHwnd());
 }
 
 void Forms::Application::EnableVisualStyles()
@@ -69,10 +69,10 @@ Application::Application()
 
 LRESULT Application::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	BaseComponent *component = _components[hwnd];
-	if (component != nullptr)
+	Form *form = _forms[hwnd];
+	if (form != nullptr)
 	{
-		return component->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
+		return form->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
