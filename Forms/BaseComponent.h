@@ -2,7 +2,7 @@
 
 #include "Macros.h"
 #include <string>
-#include <unordered_set>
+#include <vector>
 #include <functional>
 
 namespace Forms
@@ -16,6 +16,9 @@ namespace Forms
 
 		int GetHeight();
 		void SetHeight(int height);
+
+		int GetClientWidth();
+		int GetClientHeight();
 
 		const std::wstring& GetCaption() const;
 		void SetCaption(const std::wstring &caption);
@@ -34,32 +37,38 @@ namespace Forms
 		void AddChild(BaseComponent *child);
 		void RemoveChild(BaseComponent *child);
 
+		virtual void InitComponent();
+
+		virtual ~BaseComponent();
+
 	protected:
 		BaseComponent();
 		BaseComponent(const std::wstring &componentClassName);
-		~BaseComponent();
-
-		virtual void InitComponent();
-		virtual void DestroyComponent();
+	
 		HINSTANCE GetHinstance();
 
 		const std::wstring& GetComponentClassName() const;
 		void SetComponentClassName(const std::wstring &componentClassName);
 		void AppendStyle(int style);
-		void InitComponentOrDoAction(std::function<void(void)> action);
-		void InitComponentAndDoAction(std::function<void(void)> action);
+		template <class T>
+		T InitComponentOrDoAction(std::function<T(void)> action);
+		template <class T>
+		T InitComponentAndDoAction(std::function<T(void)> action);
+		void UpdateWindowSize();
+		void UpdateRects();
 
 	private:
 		HWND _hwnd;
-		int _width, _height;
 		int _styles;
-		int _x, _y;
 		std::wstring _caption, _componentClassName;
 		HINSTANCE _hInstance;
 		BaseComponent *_parent;
-		std::unordered_set<BaseComponent*> _childComponents;
+		std::vector<BaseComponent*> _childComponents;
+		RECT _windowLocalRect;
+		RECT _clientRect;
 
 		void ShowChildComponents();
 		void DestroyChildComponents();
+		void DestroyComponent();
 	};
 }

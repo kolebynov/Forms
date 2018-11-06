@@ -12,22 +12,32 @@ HWND Forms::BaseComponent::GetHwnd()
 
 int Forms::BaseComponent::GetWidth()
 {
-	return _width;
+	return _windowLocalRect.right - _windowLocalRect.left;
 }
 
 void Forms::BaseComponent::SetWidth(int width)
 {
-	_width = width;
+	_windowLocalRect.right = _windowLocalRect.left + width;
 }
 
 int Forms::BaseComponent::GetHeight()
 {
-	return _height;
+	return _windowLocalRect.bottom - _windowLocalRect.top;
 }
 
 void Forms::BaseComponent::SetHeight(int height)
 {
-	_height = height;
+	_windowLocalRect.bottom = _windowLocalRect.top + height;;
+}
+
+int Forms::BaseComponent::GetClientWidth()
+{
+	return InitComponentAndDoAction<LONG>([this] { return _clientRect.right - _clientRect.left; });
+}
+
+int Forms::BaseComponent::GetClientHeight()
+{
+	return InitComponentAndDoAction<LONG>([this] { return _clientRect.bottom - _clientRect.top; });
 }
 
 const wstring& Forms::BaseComponent::GetCaption() const
@@ -38,30 +48,38 @@ const wstring& Forms::BaseComponent::GetCaption() const
 void Forms::BaseComponent::SetCaption(const wstring &caption)
 {
 	_caption = caption;
-	if (GetHwnd())
+	if (_hwnd)
 	{
-		SetWindowText(GetHwnd(), _caption.c_str());
+		SetWindowText(_hwnd, _caption.c_str());
 	}
 }
 
 int Forms::BaseComponent::GetX()
 {
-	return _x;
+	return _windowLocalRect.left;
 }
 
 void Forms::BaseComponent::SetX(int x)
 {
-	_x = x;
+	int width = GetWidth();
+	_windowLocalRect.left = x;
+	_windowLocalRect.right = x + width;
+
+	UpdateWindowSize();
 }
 
 int Forms::BaseComponent::GetY()
 {
-	return _y;
+	return _windowLocalRect.top;
 }
 
 void Forms::BaseComponent::SetY(int y)
 {
-	_y = y;
+	int height = GetHeight();
+	_windowLocalRect.top = y;
+	_windowLocalRect.right = y + height;
+
+	UpdateWindowSize();
 }
 
 BaseComponent* Forms::BaseComponent::GetParentComponent()
@@ -92,21 +110,24 @@ void Forms::BaseComponent::SetParentComponent(BaseComponent *parent)
 
 void Forms::BaseComponent::Show()
 {
-	InitComponentAndDoAction([this] { ShowWindow(GetHwnd(), SW_SHOWNORMAL); ShowChildComponents(); });
+	InitComponentAndDoAction<void>([this] { ShowWindow(_hwnd, SW_SHOWNORMAL); ShowChildComponents(); });
 }
 
 void Forms::BaseComponent::AddChild(BaseComponent *child)
 {
-	_childComponents.insert(child);
-	if (child->GetParentComponent() != this)
+	InitComponentAndDoAction<void>([this, child]
 	{
-		child->SetParentComponent(this);
-	}
+		_childComponents.push_back(child);
+		if (child->GetParentComponent() != this)
+		{
+			child->SetParentComponent(this);
+		}
+	});
 }
 
 void Forms::BaseComponent::RemoveChild(BaseComponent *child)
 {
-	_childComponents.erase(child);
+	_childComponents.erase(find(_childComponents.begin(), _childComponents.end(), child));
 	if (child->GetParentComponent() == this)
 	{
 		child->SetParentComponent(nullptr);
@@ -123,7 +144,6 @@ Forms::BaseComponent::BaseComponent(const std::wstring &componentClassName)
 	_hInstance = Application::GetHinstance();
 	_hwnd = nullptr;
 	_parent = nullptr;
-	_childComponents = unordered_set<BaseComponent*>();
 	_styles = 0;
 
 	SetWidth(0);
@@ -144,14 +164,21 @@ void Forms::BaseComponent::InitComponent()
 	DestroyComponent();
 	_hwnd = CreateWindow(GetComponentClassName().c_str(), GetCaption().c_str(), _styles, GetX(), GetY(), GetWidth(), GetHeight(), GetParentComponent() != nullptr ? GetParentComponent()->GetHwnd() : HWND_DESKTOP, 
 		nullptr, _hInstance, nullptr);
+
+	if (!_hwnd)
+	{
+		throw exception("Can't create component");
+	}
+
+	UpdateRects();
 }
 
 void Forms::BaseComponent::DestroyComponent()
 {
-	if (GetHwnd())
+	if (_hwnd)
 	{
 		DestroyChildComponents();
-		DestroyWindow(GetHwnd());
+		DestroyWindow(_hwnd);
 		_hwnd = nullptr;
 	}
 }
@@ -176,11 +203,12 @@ void Forms::BaseComponent::AppendStyle(int style)
 	_styles |= style;
 }
 
-void Forms::BaseComponent::InitComponentOrDoAction(std::function<void(void)> action)
+template <class T>
+T Forms::BaseComponent::InitComponentOrDoAction(std::function<T(void)> action)
 {
-	if (GetHwnd())
+	if (_hwnd)
 	{
-		action();
+		return action();
 	}
 	else
 	{
@@ -188,14 +216,15 @@ void Forms::BaseComponent::InitComponentOrDoAction(std::function<void(void)> act
 	}
 }
 
-void Forms::BaseComponent::InitComponentAndDoAction(std::function<void(void)> action)
+template <class T>
+T Forms::BaseComponent::InitComponentAndDoAction(std::function<T(void)> action)
 {
-	if (!GetHwnd())
+	if (!_hwnd)
 	{
 		InitComponent();
 	}
 
-	action();
+	return action();
 }
 
 void Forms::BaseComponent::ShowChildComponents()
@@ -211,5 +240,23 @@ void Forms::BaseComponent::DestroyChildComponents()
 	for (BaseComponent *child : _childComponents)
 	{
 		delete child;
+	}
+}
+
+void Forms::BaseComponent::UpdateWindowSize()
+{
+	if (_hwnd)
+	{
+		SetWindowPos(_hwnd, (HWND)0, GetX(), GetY(), GetWidth(), GetHeight(), 0);
+	}
+}
+
+void Forms::BaseComponent::UpdateRects()
+{
+	if (_hwnd)
+	{
+		GetClientRect(_hwnd, &_clientRect);
+		GetWindowRect(_hwnd, &_windowLocalRect);
+		MapWindowPoints(HWND_DESKTOP, GetParent(_hwnd), (LPPOINT)&_windowLocalRect, 2);
 	}
 }

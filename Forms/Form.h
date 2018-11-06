@@ -9,11 +9,12 @@ namespace Forms
 	{
 	public:
 		Form(const std::wstring &name);
+		virtual ~Form();
+		int GetId();
 
 		virtual LRESULT HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	protected:
-		void InitComponent();
-		void DestroyComponent();
+	private:
+		int _id;
 	};
 }

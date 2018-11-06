@@ -5,7 +5,8 @@ using namespace Forms;
 using namespace std;
 
 HINSTANCE Application::_hInstance = nullptr;
-unordered_map<HWND, Form*> Application::_forms = unordered_map<HWND, Form*>();
+unordered_map<int, Form*> Application::_forms = unordered_map<int, Form*>();
+int Application::_nextFormId = 0;
 
 void Application::Run(Form *mainForm)
 {
@@ -36,12 +37,12 @@ HINSTANCE Forms::Application::GetHinstance()
 
 void Forms::Application::AddForm(Form *form)
 {
-	_forms[form->GetHwnd()] = form;
+	_forms[form->GetId()] = form;
 }
 
 void Forms::Application::RemoveForm(Form *form)
 {
-	_forms.erase(form->GetHwnd());
+	_forms.erase(form->GetId());
 }
 
 void Forms::Application::EnableVisualStyles()
@@ -63,16 +64,25 @@ void Forms::Application::EnableVisualStyles()
 	ActivateActCtx(CreateActCtx(&actCtx), &ulpActivationCookie);
 }
 
+int Forms::Application::GetIdForNewForm()
+{
+	return _nextFormId++;
+}
+
 Application::Application()
 {
 }
 
 LRESULT Application::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	Form *form = _forms[hwnd];
-	if (form != nullptr)
+	auto findResult = std::find_if(_forms.begin(), _forms.end(), [hwnd](const std::pair<int, Form*> &pair) { return pair.second->GetHwnd() == hwnd; });
+	if (findResult != _forms.end())
 	{
-		return form->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
+		Form *form = findResult->second;
+		if (form != nullptr)
+		{
+			return form->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
+		}
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);

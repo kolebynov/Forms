@@ -5,7 +5,7 @@
 using namespace Forms;
 using namespace std;
 
-Form::Form(const wstring &name) : BaseComponent(name)
+Form::Form(const wstring &name) : BaseComponent(L"Form")
 {
 	WNDCLASS wndClass = {};
 	wndClass.hInstance = GetHinstance();
@@ -24,10 +24,24 @@ Form::Form(const wstring &name) : BaseComponent(name)
 
 	}
 
-	SetCaption(L"ala");
 	SetWidth(300);
 	SetHeight(200);
 	AppendStyle(WS_OVERLAPPEDWINDOW);
+	SetCaption(name);
+
+	_id = Application::GetIdForNewForm();
+	Application::AddForm(this);
+}
+
+Forms::Form::~Form()
+{
+	Application::RemoveForm(this);
+	BaseComponent::~BaseComponent();
+}
+
+int Forms::Form::GetId()
+{
+	return _id;
 }
 
 LRESULT Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -37,25 +51,13 @@ LRESULT Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+	case WM_SIZE:
+	case WM_MOVE:
+		UpdateRects();
+		break;
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 
 	return 0;
-}
-
-void Forms::Form::InitComponent()
-{
-	BaseComponent::InitComponent();
-
-	if (GetHwnd())
-	{
-		Application::AddForm(this);
-	}
-}
-
-void Forms::Form::DestroyComponent()
-{
-	Application::RemoveForm(this);
-	BaseComponent::DestroyComponent();
 }

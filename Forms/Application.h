@@ -16,12 +16,14 @@ namespace Forms
 		static void AddForm(Form *form);
 		static void RemoveForm(Form *form);
 		static void EnableVisualStyles();
+		static int GetIdForNewForm();
 
 	private:
 		Application();
 
 		static HINSTANCE _hInstance;
-		static std::unordered_map<HWND, Form*> _forms;
+		static std::unordered_map<int, Form*> _forms;
+		static int _nextFormId;
 
 		static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
