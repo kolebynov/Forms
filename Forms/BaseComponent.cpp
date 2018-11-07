@@ -32,12 +32,12 @@ void Forms::BaseComponent::SetHeight(int height)
 
 int Forms::BaseComponent::GetClientWidth()
 {
-	return InitComponentAndDoAction<LONG>([this] { return _clientRect.right - _clientRect.left; });
+	return _clientRect.right - _clientRect.left;
 }
 
 int Forms::BaseComponent::GetClientHeight()
 {
-	return InitComponentAndDoAction<LONG>([this] { return _clientRect.bottom - _clientRect.top; });
+	return _clientRect.bottom - _clientRect.top;
 }
 
 const wstring& Forms::BaseComponent::GetCaption() const
@@ -97,32 +97,31 @@ void Forms::BaseComponent::SetParentComponent(BaseComponent *parent)
 		oldParent->RemoveChild(this);
 	}
 
+	HWND parentHwnd = HWND_DESKTOP;
+
 	if (_parent != nullptr)
 	{
 		_parent->AddChild(this);
-
-		if (_parent->GetHwnd())
-		{
-			Show();
-		}
+		parentHwnd = _parent->GetHwnd();
+		Show();
 	}
+
+	SetParent(_hwnd, parentHwnd);
 }
 
 void Forms::BaseComponent::Show()
 {
-	InitComponentAndDoAction<void>([this] { ShowWindow(_hwnd, SW_SHOWNORMAL); ShowChildComponents(); });
+	ShowWindow(_hwnd, SW_SHOWNORMAL); 
+	ShowChildComponents();
 }
 
 void Forms::BaseComponent::AddChild(BaseComponent *child)
 {
-	InitComponentAndDoAction<void>([this, child]
+	_childComponents.push_back(child);
+	if (child->GetParentComponent() != this)
 	{
-		_childComponents.push_back(child);
-		if (child->GetParentComponent() != this)
-		{
-			child->SetParentComponent(this);
-		}
-	});
+		child->SetParentComponent(this);
+	}
 }
 
 void Forms::BaseComponent::RemoveChild(BaseComponent *child)
@@ -134,12 +133,12 @@ void Forms::BaseComponent::RemoveChild(BaseComponent *child)
 	}
 }
 
-BaseComponent::BaseComponent() : BaseComponent(L"")
+BaseComponent::BaseComponent() : BaseComponent(L"", nullptr)
 {
 	
 }
 
-Forms::BaseComponent::BaseComponent(const std::wstring &componentClassName)
+Forms::BaseComponent::BaseComponent(const std::wstring &componentClassName, std::function<void(void)> beforeInitFunc)
 {
 	_hInstance = Application::GetHinstance();
 	_hwnd = nullptr;
@@ -151,7 +150,13 @@ Forms::BaseComponent::BaseComponent(const std::wstring &componentClassName)
 	SetX(0);
 	SetY(0);
 	SetCaption(L"");
-	SetComponentClassName(componentClassName);	
+	SetComponentClassName(componentClassName);
+
+	if (beforeInitFunc != nullptr)
+	{
+		beforeInitFunc();
+	}
+	InitComponent();
 }
 
 BaseComponent::~BaseComponent()
@@ -167,7 +172,7 @@ void Forms::BaseComponent::InitComponent()
 
 	if (!_hwnd)
 	{
-		throw exception("Can't create component");
+		throw runtime_error("Can't create component");
 	}
 
 	UpdateRects();
@@ -175,12 +180,9 @@ void Forms::BaseComponent::InitComponent()
 
 void Forms::BaseComponent::DestroyComponent()
 {
-	if (_hwnd)
-	{
-		DestroyChildComponents();
-		DestroyWindow(_hwnd);
-		_hwnd = nullptr;
-	}
+	DestroyChildComponents();
+	DestroyWindow(_hwnd);
+	_hwnd = nullptr;
 }
 
 HINSTANCE Forms::BaseComponent::GetHinstance()
@@ -201,30 +203,6 @@ void Forms::BaseComponent::SetComponentClassName(const wstring &componentClassNa
 void Forms::BaseComponent::AppendStyle(int style)
 {
 	_styles |= style;
-}
-
-template <class T>
-T Forms::BaseComponent::InitComponentOrDoAction(std::function<T(void)> action)
-{
-	if (_hwnd)
-	{
-		return action();
-	}
-	else
-	{
-		InitComponent();
-	}
-}
-
-template <class T>
-T Forms::BaseComponent::InitComponentAndDoAction(std::function<T(void)> action)
-{
-	if (!_hwnd)
-	{
-		InitComponent();
-	}
-
-	return action();
 }
 
 void Forms::BaseComponent::ShowChildComponents()

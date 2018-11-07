@@ -3,7 +3,7 @@
 
 using namespace Forms;
 
-Button::Button() : BaseComponent(L"BUTTON")
+Button::Button() : BaseComponent(L"BUTTON", nullptr)
 {
 	AppendStyle(WS_CHILD | BS_NULL);
 	SetHeight(50);

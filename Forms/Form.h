@@ -16,5 +16,7 @@ namespace Forms
 
 	private:
 		int _id;
+
+		void InitForm();
 	};
 }

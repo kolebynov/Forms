@@ -37,23 +37,17 @@ namespace Forms
 		void AddChild(BaseComponent *child);
 		void RemoveChild(BaseComponent *child);
 
-		virtual void InitComponent();
-
 		virtual ~BaseComponent();
 
 	protected:
 		BaseComponent();
-		BaseComponent(const std::wstring &componentClassName);
+		BaseComponent(const std::wstring &componentClassName, std::function<void(void)> beforeInitFunc);
 	
 		HINSTANCE GetHinstance();
 
 		const std::wstring& GetComponentClassName() const;
 		void SetComponentClassName(const std::wstring &componentClassName);
 		void AppendStyle(int style);
-		template <class T>
-		T InitComponentOrDoAction(std::function<T(void)> action);
-		template <class T>
-		T InitComponentAndDoAction(std::function<T(void)> action);
 		void UpdateWindowSize();
 		void UpdateRects();
 
@@ -69,6 +63,7 @@ namespace Forms
 
 		void ShowChildComponents();
 		void DestroyChildComponents();
+		void InitComponent();
 		void DestroyComponent();
 	};
 }
