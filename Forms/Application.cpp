@@ -12,11 +12,14 @@ void Application::Run(Form *mainForm)
 {
 	mainForm->Show();
 
-	MSG msg;
-	while (GetMessage(&msg, nullptr, 0, 0))
+	MSG msg = {};
+	while (msg.message != WM_QUIT)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 }
 

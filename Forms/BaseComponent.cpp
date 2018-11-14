@@ -18,6 +18,7 @@ int Forms::BaseComponent::GetWidth()
 void Forms::BaseComponent::SetWidth(int width)
 {
 	_windowLocalRect.right = _windowLocalRect.left + width;
+	UpdateWindowSize();
 }
 
 int Forms::BaseComponent::GetHeight()
@@ -27,7 +28,8 @@ int Forms::BaseComponent::GetHeight()
 
 void Forms::BaseComponent::SetHeight(int height)
 {
-	_windowLocalRect.bottom = _windowLocalRect.top + height;;
+	_windowLocalRect.bottom = _windowLocalRect.top + height;
+	UpdateWindowSize();
 }
 
 int Forms::BaseComponent::GetClientWidth()

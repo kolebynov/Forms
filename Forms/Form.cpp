@@ -26,18 +26,29 @@ LRESULT Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
 {
 	switch (uMsg)
 	{
-	case WM_DESTROY:
-		PostQuitMessage(0);
+	case WM_PAINT:
+		for_each(_onPaintHandlers.begin(), _onPaintHandlers.end(), [](std::function<void()> &handler) { handler(); });
 		break;
 	case WM_SIZE:
 	case WM_MOVE:
 		UpdateRects();
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
 		break;
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 
 	return 0;
+}
+
+void Forms::Form::OnPaint(std::function<void()> handler)
+{
+	if (handler != nullptr)
+	{
+		_onPaintHandlers.push_back(handler);
+	}
 }
 
 void Forms::Form::InitForm()
