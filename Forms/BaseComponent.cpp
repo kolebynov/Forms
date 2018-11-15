@@ -7,6 +7,11 @@ using namespace std;
 
 HWND Forms::BaseComponent::GetHwnd()
 {
+	if (!_hwnd)
+	{
+		throw runtime_error("Component not created");
+	}
+
 	return _hwnd;
 }
 
@@ -99,16 +104,21 @@ void Forms::BaseComponent::SetParentComponent(BaseComponent *parent)
 		oldParent->RemoveChild(this);
 	}
 
-	HWND parentHwnd = HWND_DESKTOP;
-
 	if (_parent != nullptr)
 	{
 		_parent->AddChild(this);
-		parentHwnd = _parent->GetHwnd();
-		Show();
 	}
 
-	SetParent(_hwnd, parentHwnd);
+	if (!_hwnd)
+	{
+		InitComponent();
+	}
+	else
+	{
+		SetParent(_hwnd, GetParentHwnd());
+	}
+
+	Show();
 }
 
 void Forms::BaseComponent::Show()
@@ -147,10 +157,8 @@ Forms::BaseComponent::BaseComponent(const std::wstring &componentClassName, std:
 	_parent = nullptr;
 	_styles = 0;
 
-	SetWidth(0);
-	SetHeight(0);
-	SetX(0);
-	SetY(0);
+	_windowLocalRect = {};
+	_clientRect = {};
 	SetCaption(L"");
 	SetComponentClassName(componentClassName);
 
@@ -169,13 +177,8 @@ BaseComponent::~BaseComponent()
 void Forms::BaseComponent::InitComponent()
 {
 	DestroyComponent();
-	_hwnd = CreateWindow(GetComponentClassName().c_str(), GetCaption().c_str(), _styles, GetX(), GetY(), GetWidth(), GetHeight(), GetParentComponent() != nullptr ? GetParentComponent()->GetHwnd() : HWND_DESKTOP, 
+	_hwnd = CreateWindow(GetComponentClassName().c_str(), GetCaption().c_str(), _styles, GetX(), GetY(), GetWidth(), GetHeight(), GetParentHwnd(),
 		nullptr, _hInstance, nullptr);
-
-	if (!_hwnd)
-	{
-		throw runtime_error("Can't create component");
-	}
 
 	UpdateRects();
 }
@@ -192,6 +195,11 @@ HINSTANCE Forms::BaseComponent::GetHinstance()
 	return _hInstance;
 }
 
+HWND Forms::BaseComponent::GetParentHwnd()
+{
+	return GetParentComponent() != nullptr ? GetParentComponent()->GetHwnd() : HWND_DESKTOP;
+}
+
 const wstring& Forms::BaseComponent::GetComponentClassName() const
 {
 	return _componentClassName;
@@ -205,6 +213,7 @@ void Forms::BaseComponent::SetComponentClassName(const wstring &componentClassNa
 void Forms::BaseComponent::AppendStyle(int style)
 {
 	_styles |= style;
+	UpdateWindowSize();
 }
 
 void Forms::BaseComponent::ShowChildComponents()
@@ -237,6 +246,6 @@ void Forms::BaseComponent::UpdateRects()
 	{
 		GetClientRect(_hwnd, &_clientRect);
 		GetWindowRect(_hwnd, &_windowLocalRect);
-		MapWindowPoints(HWND_DESKTOP, GetParent(_hwnd), (LPPOINT)&_windowLocalRect, 2);
+		MapWindowPoints(HWND_DESKTOP, GetParentHwnd(), (LPPOINT)&_windowLocalRect, 2);
 	}
 }

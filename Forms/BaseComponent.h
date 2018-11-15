@@ -44,6 +44,7 @@ namespace Forms
 		BaseComponent(const std::wstring &componentClassName, std::function<void(void)> beforeInitFunc);
 	
 		HINSTANCE GetHinstance();
+		HWND GetParentHwnd();
 
 		const std::wstring& GetComponentClassName() const;
 		void SetComponentClassName(const std::wstring &componentClassName);
