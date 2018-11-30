@@ -9,6 +9,6 @@ namespace Forms
 	{
 	public:
 		Button();
-		LRESULT HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		void HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
 }

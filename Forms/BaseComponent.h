@@ -29,17 +29,26 @@ namespace Forms
 		int GetY();
 		void SetY(int y);
 
+		bool IsVisible();
+		void SetVisible(bool visible);
+
 		BaseComponent* GetParentComponent();
 		void SetParentComponent(BaseComponent *parent);
 
-		void Show();
+		const std::pair<std::vector<BaseComponent*>::const_iterator, std::vector<BaseComponent*>::const_iterator> GetChildComponents() const;
 
 		void AddChild(BaseComponent *child);
 		void RemoveChild(BaseComponent *child);
 
+		virtual void HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 		virtual ~BaseComponent();
+		
+		void OnClick(std::function<void()> handler);
 
 	protected:
+		int showFlags;
+
 		BaseComponent();
 		BaseComponent(const std::wstring &componentClassName, std::function<void(void)> beforeInitFunc);
 	
@@ -50,21 +59,29 @@ namespace Forms
 		void SetComponentClassName(const std::wstring &componentClassName);
 		void AppendStyle(int style);
 		void UpdateWindowSize();
+		void SetVisibleInternal(bool visible);
 		void UpdateRects();
+		void ShowInternal();
+		void HideInternal();
+		
+		void RaiseClickEvent();
 
 	private:
 		HWND _hwnd;
-		int _styles;
+		DWORD _styles;
 		std::wstring _caption, _componentClassName;
 		HINSTANCE _hInstance;
 		BaseComponent *_parent;
 		std::vector<BaseComponent*> _childComponents;
 		RECT _windowLocalRect;
 		RECT _clientRect;
+		bool _isVisible;
 
-		void ShowChildComponents();
+		std::vector<std::function<void()>> _onClickHandlers;
+
 		void DestroyChildComponents();
 		void InitComponent();
 		void DestroyComponent();
+		void UpdateWindowStyle();
 	};
 }

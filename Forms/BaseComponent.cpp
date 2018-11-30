@@ -5,6 +5,32 @@
 using namespace Forms;
 using namespace std;
 
+BaseComponent::BaseComponent() : BaseComponent(L"", nullptr)
+{
+
+}
+
+Forms::BaseComponent::BaseComponent(const std::wstring &componentClassName, std::function<void(void)> beforeInitFunc)
+{
+	_hInstance = Application::GetHinstance();
+	_hwnd = nullptr;
+	_parent = nullptr;
+	_styles = 0;
+	showFlags = SW_SHOW;
+	_isVisible = true;
+
+	_windowLocalRect = {};
+	_clientRect = {};
+	SetCaption(L"");
+	SetComponentClassName(componentClassName);
+
+	if (beforeInitFunc != nullptr)
+	{
+		beforeInitFunc();
+	}
+	InitComponent();
+}
+
 HWND Forms::BaseComponent::GetHwnd()
 {
 	if (!_hwnd)
@@ -84,9 +110,25 @@ void Forms::BaseComponent::SetY(int y)
 {
 	int height = GetHeight();
 	_windowLocalRect.top = y;
-	_windowLocalRect.right = y + height;
+	_windowLocalRect.bottom = y + height;
 
 	UpdateWindowSize();
+}
+
+bool Forms::BaseComponent::IsVisible()
+{
+	return _isVisible;
+}
+
+void Forms::BaseComponent::SetVisible(bool visible)
+{
+	_isVisible = visible;
+	if (_isVisible && !_hwnd)
+	{
+		InitComponent();
+	}
+
+	SetVisibleInternal(_isVisible);
 }
 
 BaseComponent* Forms::BaseComponent::GetParentComponent()
@@ -117,14 +159,11 @@ void Forms::BaseComponent::SetParentComponent(BaseComponent *parent)
 	{
 		SetParent(_hwnd, GetParentHwnd());
 	}
-
-	Show();
 }
 
-void Forms::BaseComponent::Show()
+const std::pair<std::vector<BaseComponent*>::const_iterator, std::vector<BaseComponent*>::const_iterator> Forms::BaseComponent::GetChildComponents() const
 {
-	ShowWindow(_hwnd, SW_SHOWNORMAL); 
-	ShowChildComponents();
+	return std::make_pair(_childComponents.cbegin(), _childComponents.cend());
 }
 
 void Forms::BaseComponent::AddChild(BaseComponent *child)
@@ -145,33 +184,14 @@ void Forms::BaseComponent::RemoveChild(BaseComponent *child)
 	}
 }
 
-BaseComponent::BaseComponent() : BaseComponent(L"", nullptr)
-{
-	
-}
-
-Forms::BaseComponent::BaseComponent(const std::wstring &componentClassName, std::function<void(void)> beforeInitFunc)
-{
-	_hInstance = Application::GetHinstance();
-	_hwnd = nullptr;
-	_parent = nullptr;
-	_styles = 0;
-
-	_windowLocalRect = {};
-	_clientRect = {};
-	SetCaption(L"");
-	SetComponentClassName(componentClassName);
-
-	if (beforeInitFunc != nullptr)
-	{
-		beforeInitFunc();
-	}
-	InitComponent();
-}
-
 BaseComponent::~BaseComponent()
 {
 	DestroyComponent();
+}
+
+void Forms::BaseComponent::OnClick(std::function<void()> handler)
+{
+	_onClickHandlers.push_back(handler);
 }
 
 void Forms::BaseComponent::InitComponent()
@@ -181,6 +201,11 @@ void Forms::BaseComponent::InitComponent()
 		nullptr, _hInstance, nullptr);
 
 	UpdateRects();
+
+	if (IsVisible() && _hwnd)
+	{
+		ShowInternal();
+	}
 }
 
 void Forms::BaseComponent::DestroyComponent()
@@ -188,6 +213,15 @@ void Forms::BaseComponent::DestroyComponent()
 	DestroyChildComponents();
 	DestroyWindow(_hwnd);
 	_hwnd = nullptr;
+}
+
+void Forms::BaseComponent::UpdateWindowStyle()
+{
+	if (_hwnd)
+	{
+		SetWindowLongPtr(_hwnd, GWL_STYLE, _styles);
+		UpdateWindowSize();
+	}
 }
 
 HINSTANCE Forms::BaseComponent::GetHinstance()
@@ -213,15 +247,7 @@ void Forms::BaseComponent::SetComponentClassName(const wstring &componentClassNa
 void Forms::BaseComponent::AppendStyle(int style)
 {
 	_styles |= style;
-	UpdateWindowSize();
-}
-
-void Forms::BaseComponent::ShowChildComponents()
-{
-	for (BaseComponent *child : _childComponents)
-	{
-		child->Show();
-	}
+	UpdateWindowStyle();
 }
 
 void Forms::BaseComponent::DestroyChildComponents()
@@ -247,5 +273,33 @@ void Forms::BaseComponent::UpdateRects()
 		GetClientRect(_hwnd, &_clientRect);
 		GetWindowRect(_hwnd, &_windowLocalRect);
 		MapWindowPoints(HWND_DESKTOP, GetParentHwnd(), (LPPOINT)&_windowLocalRect, 2);
+	}
+}
+
+void Forms::BaseComponent::ShowInternal()
+{
+	SetVisibleInternal(true);
+}
+
+void Forms::BaseComponent::HideInternal()
+{
+	SetVisibleInternal(false);
+}
+
+void Forms::BaseComponent::RaiseClickEvent()
+{
+	for_each(_onClickHandlers.begin(), _onClickHandlers.end(), [](std::function<void()> &handler) { handler(); });
+}
+
+void Forms::BaseComponent::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	
+}
+
+void Forms::BaseComponent::SetVisibleInternal(bool visible)
+{
+	if (_hwnd)
+	{
+		ShowWindow(_hwnd, visible ? showFlags : SW_HIDE);
 	}
 }

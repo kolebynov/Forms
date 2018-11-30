@@ -84,7 +84,7 @@ LRESULT Application::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		Form *form = findResult->second;
 		if (form != nullptr)
 		{
-			return form->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
+			form->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
 		}
 	}
 

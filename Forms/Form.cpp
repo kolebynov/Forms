@@ -22,7 +22,12 @@ int Forms::Form::GetId()
 	return _id;
 }
 
-LRESULT Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+void Forms::Form::Show()
+{
+	SetVisible(true);
+}
+
+void Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
@@ -36,11 +41,13 @@ LRESULT Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-	default:
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	case WM_COMMAND:
+		auto childComponents = GetChildComponents();
+		auto result = find_if(childComponents.first, childComponents.second,
+			[lParam](BaseComponent *component) { return component->GetHwnd() == (HWND)lParam; });
+		(*result)->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
+		break;
 	}
-
-	return 0;
 }
 
 void Forms::Form::OnPaint(std::function<void()> handler)
@@ -74,4 +81,6 @@ void Forms::Form::InitForm()
 	SetHeight(200);
 	AppendStyle(WS_OVERLAPPEDWINDOW);
 	SetCaption(GetComponentClassName());
+
+	showFlags = SW_SHOWNORMAL;
 }

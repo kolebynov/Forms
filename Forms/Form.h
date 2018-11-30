@@ -12,7 +12,9 @@ namespace Forms
 		virtual ~Form();
 		int GetId();
 
-		virtual LRESULT HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		void Show();
+
+		void HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 		void OnPaint(std::function<void()> handler);
 

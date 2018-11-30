@@ -5,7 +5,7 @@ using namespace Forms;
 
 Button::Button() : BaseComponent(L"BUTTON", [this] 
 {
-	AppendStyle(WS_CHILD | BS_NULL);
+	AppendStyle(WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON);
 	SetHeight(50);
 	SetWidth(100); 
 })
@@ -13,7 +13,13 @@ Button::Button() : BaseComponent(L"BUTTON", [this]
 	
 }
 
-LRESULT Forms::Button::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+void Forms::Button::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	return 0;
+	if (uMsg == WM_COMMAND)
+	{
+		if (HIWORD(wParam) == BN_CLICKED)
+		{
+			RaiseClickEvent();
+		}
+	}
 }
