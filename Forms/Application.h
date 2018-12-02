@@ -24,6 +24,7 @@ namespace Forms
 		static HINSTANCE _hInstance;
 		static std::unordered_map<int, Form*> _forms;
 		static int _nextFormId;
+		static int _mainFormId;
 
 		static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};

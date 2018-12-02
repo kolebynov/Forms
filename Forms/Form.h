@@ -2,6 +2,8 @@
 
 #include "Macros.h"
 #include "BaseComponent.h"
+#include "FormStyles.h"
+#include "EnumUtils.h"
 
 namespace Forms
 {
@@ -14,12 +16,16 @@ namespace Forms
 
 		void Show();
 
-		void HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		void SetStyle(FormStyles style);
+		FormStyles GetStyle();
+
+		bool HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 		void OnPaint(std::function<void()> handler);
 
 	private:
 		int _id;
+		FormStyles _styles;
 		std::vector<std::function<void()>> _onPaintHandlers;
 
 		void InitForm();

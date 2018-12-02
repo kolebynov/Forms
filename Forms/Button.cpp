@@ -1,25 +1,10 @@
 #include "stdafx.h"
 #include "Button.h"
 
-using namespace Forms;
-
-Button::Button() : BaseComponent(L"BUTTON", [this] 
+namespace Forms
 {
-	AppendStyle(WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON);
-	SetHeight(50);
-	SetWidth(100); 
-})
-{
-	
-}
-
-void Forms::Button::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	if (uMsg == WM_COMMAND)
+	Button::Button() : BaseButton(BS_DEFPUSHBUTTON)
 	{
-		if (HIWORD(wParam) == BN_CLICKED)
-		{
-			RaiseClickEvent();
-		}
+
 	}
 }

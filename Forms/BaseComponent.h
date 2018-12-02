@@ -40,7 +40,7 @@ namespace Forms
 		void AddChild(BaseComponent *child);
 		void RemoveChild(BaseComponent *child);
 
-		virtual void HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+		virtual bool HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 		virtual ~BaseComponent();
 		
@@ -57,7 +57,10 @@ namespace Forms
 
 		const std::wstring& GetComponentClassName() const;
 		void SetComponentClassName(const std::wstring &componentClassName);
-		void AppendStyle(int style);
+
+		void SetInternalStyle(DWORD style);
+		DWORD GetInternalStyle();
+
 		void UpdateWindowSize();
 		void SetVisibleInternal(bool visible);
 		void UpdateRects();

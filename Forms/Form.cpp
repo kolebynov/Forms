@@ -14,7 +14,6 @@ Form::Form(const wstring &name) : BaseComponent(name, [this] { InitForm(); })
 Forms::Form::~Form()
 {
 	Application::RemoveForm(this);
-	BaseComponent::~BaseComponent();
 }
 
 int Forms::Form::GetId()
@@ -27,8 +26,21 @@ void Forms::Form::Show()
 	SetVisible(true);
 }
 
-void Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+void Forms::Form::SetStyle(FormStyles style)
 {
+	_styles = style;
+	SetInternalStyle(static_cast<DWORD>(style));
+}
+
+FormStyles Forms::Form::GetStyle()
+{
+	return _styles;
+}
+
+bool Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	bool useDefBehavior = true;
+
 	switch (uMsg)
 	{
 	case WM_PAINT:
@@ -45,9 +57,11 @@ void Forms::Form::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 		auto childComponents = GetChildComponents();
 		auto result = find_if(childComponents.first, childComponents.second,
 			[lParam](BaseComponent *component) { return component->GetHwnd() == (HWND)lParam; });
-		(*result)->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
+		useDefBehavior = (*result)->HandleNativeEvent(hwnd, uMsg, wParam, lParam);
 		break;
 	}
+
+	return useDefBehavior;
 }
 
 void Forms::Form::OnPaint(std::function<void()> handler)
@@ -79,7 +93,8 @@ void Forms::Form::InitForm()
 
 	SetWidth(300);
 	SetHeight(200);
-	AppendStyle(WS_OVERLAPPEDWINDOW);
+	SetVisible(false);
+	SetStyle(FormStyles::Caption | FormStyles::SysMenu | FormStyles::MaximizeBox | FormStyles::MinimizeBox | FormStyles::Sizebox);
 	SetCaption(GetComponentClassName());
 
 	showFlags = SW_SHOWNORMAL;

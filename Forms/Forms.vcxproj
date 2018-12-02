@@ -148,17 +148,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="BaseButton.h" />
     <ClInclude Include="BaseComponent.h" />
     <ClInclude Include="Button.h" />
+    <ClInclude Include="CheckBox.h" />
+    <ClInclude Include="EnumUtils.h" />
     <ClInclude Include="Form.h" />
+    <ClInclude Include="FormStyles.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="BaseButton.cpp" />
     <ClCompile Include="BaseComponent.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="CheckBox.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Form.cpp" />
     <ClCompile Include="stdafx.cpp">

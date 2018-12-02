@@ -148,7 +148,11 @@ void Forms::BaseComponent::SetParentComponent(BaseComponent *parent)
 
 	if (_parent != nullptr)
 	{
-		_parent->AddChild(this);
+		auto parentChilds = _parent->GetChildComponents();
+		if (find(parentChilds.first, parentChilds.second, this) == parentChilds.second)
+		{
+			_parent->AddChild(this);
+		}
 	}
 
 	if (!_hwnd)
@@ -211,7 +215,6 @@ void Forms::BaseComponent::InitComponent()
 void Forms::BaseComponent::DestroyComponent()
 {
 	DestroyChildComponents();
-	DestroyWindow(_hwnd);
 	_hwnd = nullptr;
 }
 
@@ -219,8 +222,9 @@ void Forms::BaseComponent::UpdateWindowStyle()
 {
 	if (_hwnd)
 	{
-		SetWindowLongPtr(_hwnd, GWL_STYLE, _styles);
+		LONG_PTR result = SetWindowLongPtr(_hwnd, GWL_STYLE, _styles);
 		UpdateWindowSize();
+		SetVisibleInternal(_isVisible);
 	}
 }
 
@@ -244,10 +248,15 @@ void Forms::BaseComponent::SetComponentClassName(const wstring &componentClassNa
 	_componentClassName = componentClassName;
 }
 
-void Forms::BaseComponent::AppendStyle(int style)
+void Forms::BaseComponent::SetInternalStyle(DWORD style)
 {
-	_styles |= style;
+	_styles = style;
 	UpdateWindowStyle();
+}
+
+DWORD Forms::BaseComponent::GetInternalStyle()
+{
+	return _styles;
 }
 
 void Forms::BaseComponent::DestroyChildComponents()
@@ -262,7 +271,7 @@ void Forms::BaseComponent::UpdateWindowSize()
 {
 	if (_hwnd)
 	{
-		SetWindowPos(_hwnd, (HWND)0, GetX(), GetY(), GetWidth(), GetHeight(), 0);
+		SetWindowPos(_hwnd, HWND_TOP, GetX(), GetY(), GetWidth(), GetHeight(), SWP_FRAMECHANGED);
 	}
 }
 
@@ -291,9 +300,9 @@ void Forms::BaseComponent::RaiseClickEvent()
 	for_each(_onClickHandlers.begin(), _onClickHandlers.end(), [](std::function<void()> &handler) { handler(); });
 }
 
-void Forms::BaseComponent::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+bool Forms::BaseComponent::HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	
+	return true;
 }
 
 void Forms::BaseComponent::SetVisibleInternal(bool visible)

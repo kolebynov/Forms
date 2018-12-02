@@ -36,6 +36,18 @@
     <ClInclude Include="Button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FormStyles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -54,6 +66,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

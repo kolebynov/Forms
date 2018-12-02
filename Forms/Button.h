@@ -1,14 +1,13 @@
 #pragma once
 
-#include "BaseComponent.h";
+#include "BaseButton.h";
 #include "Macros.h"
 
 namespace Forms
 {
-	class FORMS_API Button : public BaseComponent
+	class FORMS_API Button : public BaseButton
 	{
 	public:
 		Button();
-		void HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
 }
