@@ -10,7 +10,7 @@ namespace Forms
 	class FORMS_API Form : public BaseComponent
 	{
 	public:
-		Form(const std::wstring &name);
+		Form();
 		virtual ~Form();
 		int GetId();
 

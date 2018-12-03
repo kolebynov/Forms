@@ -5,9 +5,8 @@
 using namespace Forms;
 using namespace std;
 
-Form::Form(const wstring &name) : BaseComponent(name, [this] { InitForm(); })
+Form::Form() : BaseComponent(std::wstring(), [this] { InitForm(); })
 {
-	_id = Application::GetIdForNewForm();
 	Application::AddForm(this);
 }
 
@@ -74,6 +73,9 @@ void Forms::Form::OnPaint(std::function<void()> handler)
 
 void Forms::Form::InitForm()
 {
+	_id = Application::GetIdForNewForm();
+	SetComponentClassName(L"Form_" + to_wstring(_id));
+
 	WNDCLASS wndClass = {};
 	wndClass.hInstance = GetHinstance();
 	wndClass.lpszClassName = GetComponentClassName().c_str();
@@ -95,7 +97,6 @@ void Forms::Form::InitForm()
 	SetHeight(200);
 	SetVisible(false);
 	SetStyle(FormStyles::Caption | FormStyles::SysMenu | FormStyles::MaximizeBox | FormStyles::MinimizeBox | FormStyles::Sizebox);
-	SetCaption(GetComponentClassName());
 
 	showFlags = SW_SHOWNORMAL;
 }

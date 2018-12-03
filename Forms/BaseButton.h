@@ -1,10 +1,10 @@
 #pragma once
 #include "stdafx.h"
-#include "BaseComponent.h"
+#include "BaseControl.h"
 
 namespace Forms
 {
-	class FORMS_API BaseButton : public BaseComponent
+	class FORMS_API BaseButton : public BaseControl
 	{
 	public:
 		bool HandleNativeEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

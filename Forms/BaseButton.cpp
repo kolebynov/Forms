@@ -3,11 +3,12 @@
 
 namespace Forms
 {
-	BaseButton::BaseButton(DWORD btnStyle) : BaseComponent(L"BUTTON", [this, btnStyle]
+	BaseButton::BaseButton(DWORD btnStyle) : BaseControl(L"BUTTON", [this, btnStyle]
 	{
-		SetInternalStyle(WS_TABSTOP | WS_VISIBLE | WS_CHILD | btnStyle);
-		SetHeight(50);
-		SetWidth(100);
+		defStyle |= WS_TABSTOP;
+		SetInternalStyle(btnStyle);
+		SetHeight(35);
+		SetWidth(70);
 	})
 	{
 	}

@@ -20,8 +20,8 @@ namespace Forms
 		int GetClientWidth();
 		int GetClientHeight();
 
-		const std::wstring& GetCaption() const;
-		void SetCaption(const std::wstring &caption);
+		const std::wstring& GetText() const;
+		void SetText(const std::wstring &text);
 
 		int GetX();
 		void SetX(int x);
@@ -48,6 +48,7 @@ namespace Forms
 
 	protected:
 		int showFlags;
+		DWORD defStyle;
 
 		BaseComponent();
 		BaseComponent(const std::wstring &componentClassName, std::function<void(void)> beforeInitFunc);
@@ -72,7 +73,7 @@ namespace Forms
 	private:
 		HWND _hwnd;
 		DWORD _styles;
-		std::wstring _caption, _componentClassName;
+		std::wstring _text, _componentClassName;
 		HINSTANCE _hInstance;
 		BaseComponent *_parent;
 		std::vector<BaseComponent*> _childComponents;

@@ -18,10 +18,11 @@ Forms::BaseComponent::BaseComponent(const std::wstring &componentClassName, std:
 	_styles = 0;
 	showFlags = SW_SHOW;
 	_isVisible = true;
+	defStyle = 0;
 
 	_windowLocalRect = {};
 	_clientRect = {};
-	SetCaption(L"");
+	SetText(L"");
 	SetComponentClassName(componentClassName);
 
 	if (beforeInitFunc != nullptr)
@@ -73,17 +74,17 @@ int Forms::BaseComponent::GetClientHeight()
 	return _clientRect.bottom - _clientRect.top;
 }
 
-const wstring& Forms::BaseComponent::GetCaption() const
+const wstring& Forms::BaseComponent::GetText() const
 {
-	return _caption;
+	return _text;
 }
 
-void Forms::BaseComponent::SetCaption(const wstring &caption)
+void Forms::BaseComponent::SetText(const wstring &caption)
 {
-	_caption = caption;
+	_text = caption;
 	if (_hwnd)
 	{
-		SetWindowText(_hwnd, _caption.c_str());
+		SetWindowText(_hwnd, _text.c_str());
 	}
 }
 
@@ -201,7 +202,7 @@ void Forms::BaseComponent::OnClick(std::function<void()> handler)
 void Forms::BaseComponent::InitComponent()
 {
 	DestroyComponent();
-	_hwnd = CreateWindow(GetComponentClassName().c_str(), GetCaption().c_str(), _styles, GetX(), GetY(), GetWidth(), GetHeight(), GetParentHwnd(),
+	_hwnd = CreateWindow(GetComponentClassName().c_str(), GetText().c_str(), _styles, GetX(), GetY(), GetWidth(), GetHeight(), GetParentHwnd(),
 		nullptr, _hInstance, nullptr);
 
 	UpdateRects();
@@ -250,7 +251,7 @@ void Forms::BaseComponent::SetComponentClassName(const wstring &componentClassNa
 
 void Forms::BaseComponent::SetInternalStyle(DWORD style)
 {
-	_styles = style;
+	_styles = defStyle | style;
 	UpdateWindowStyle();
 }
 
